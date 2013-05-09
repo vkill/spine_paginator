@@ -1,0 +1,21 @@
+{
+  "name": "spine.paginator",
+  "repo": "vkill/spine_paginator",
+  "description": "Paginator for Spine.",
+  "version": "0.1.0",
+  "keywords": [
+    "paginator",
+    "spine",
+    "pagination"
+  ],
+  "scripts": [
+    "dist/spine.paginator.js"
+  ],
+  "main": "dist/spine.paginator.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ]
+}
