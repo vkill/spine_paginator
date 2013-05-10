@@ -2,12 +2,19 @@
 // version: 0.1.0
 // author: vkill
 // license: MIT
+/*
+  Usage
+
+  data = ({name: String.fromCharCode(num)} for num in ['a'.charCodeAt(0)..'z'.charCodeAt(0)])
+  pagination = new Paginator(data, 2, {perPage: 3})
+  pagination.records
+  pagination.locals
+  pagination.buttons
+*/
+
+
 (function() {
-  var Extend, Model, Paginator, Spine;
-
-  Spine = this.Spine || require('spine');
-
-  Model = Spine.Model;
+  var Paginator, Spine, isArray;
 
   Paginator = (function() {
     Paginator.DEFAULT_PER_PAGE = 25;
@@ -22,6 +29,15 @@
 
     Paginator.RIGHT = 0;
 
+    Paginator.PAGE_TEXTS = {
+      first: 'first',
+      prev: 'prev',
+      current: 'current',
+      next: 'next',
+      last: 'last',
+      gap: 'gap'
+    };
+
     function Paginator(records, _page, options) {
       var outer_window;
 
@@ -29,6 +45,11 @@
       if (options == null) {
         options = {};
       }
+      if (!isArray(records)) {
+        records = [records];
+      }
+      this.originalRecords = records;
+      this.totalCount = this.originalRecords.length;
       this._page = parseInt(this._page);
       if (isNaN(this._page) || this._page <= 0) {
         this._page = 1;
@@ -50,8 +71,6 @@
       if (this.right === 0) {
         this.right = outer_window;
       }
-      this.originalRecords = this.cloneArray(records);
-      this.totalCount = this.originalRecords.length;
       this.skipbuildButtonsAndLocals = options.skipbuildButtonsAndLocals;
       this.records = [];
       this.buttons = [];
@@ -103,35 +122,6 @@
       return this.currentPage() >= this.lastPage();
     };
 
-    Paginator.prototype.pages = function() {
-      var currentPage, firstPage, last, lastPage, page, result, _i, _pages;
-
-      currentPage = this.currentPage();
-      firstPage = this.firstPage();
-      lastPage = this.lastPage();
-      _pages = [];
-      last = null;
-      for (page = _i = firstPage; firstPage <= lastPage ? _i <= lastPage : _i >= lastPage; page = firstPage <= lastPage ? ++_i : --_i) {
-        result = this.buildPage(page, last, currentPage, firstPage, lastPage);
-        if (result.isLeftOuter || result.isRightOuter || result.isInsideWindow) {
-          last = null;
-        } else {
-          last = 'gap';
-        }
-        _pages.push(result);
-      }
-      return _pages;
-    };
-
-    Paginator.prototype.curPage = function() {
-      var currentPage, firstPage, lastPage;
-
-      currentPage = this.currentPage();
-      firstPage = this.firstPage();
-      lastPage = this.lastPage();
-      return this.buildPage(currentPage, null, currentPage, firstPage, lastPage);
-    };
-
     Paginator.prototype.limitValue = function() {
       if (this.perPage > this.totalCount) {
         this.perPage = this.totalCount;
@@ -163,8 +153,37 @@
         isLeftOuter: page <= this.left,
         isRightOuter: (lastPage - page) < this.right,
         isInsideWindow: Math.abs(currentPage - page) <= this.window,
-        isWasTruncated: last === 'gap'
+        isWasTruncated: last === this.constructor.PAGE_TEXTS['gap']
       };
+    };
+
+    Paginator.prototype.curPage = function() {
+      var currentPage, firstPage, lastPage;
+
+      currentPage = this.currentPage();
+      firstPage = this.firstPage();
+      lastPage = this.lastPage();
+      return this.buildPage(currentPage, null, currentPage, firstPage, lastPage);
+    };
+
+    Paginator.prototype.pages = function() {
+      var currentPage, firstPage, last, lastPage, page, result, _i, _pages;
+
+      currentPage = this.currentPage();
+      firstPage = this.firstPage();
+      lastPage = this.lastPage();
+      _pages = [];
+      last = null;
+      for (page = _i = firstPage; firstPage <= lastPage ? _i <= lastPage : _i >= lastPage; page = firstPage <= lastPage ? ++_i : --_i) {
+        result = this.buildPage(page, last, currentPage, firstPage, lastPage);
+        if (result.isLeftOuter || result.isRightOuter || result.isInsideWindow) {
+          last = null;
+        } else {
+          last = this.constructor.PAGE_TEXTS['gap'];
+        }
+        _pages.push(result);
+      }
+      return _pages;
     };
 
     Paginator.prototype.buildButtonsAndLocals = function() {
@@ -175,13 +194,13 @@
       curPage = this.curPage();
       pages = this.pages();
       if (!curPage.isFirst) {
-        _buttons.push('first');
+        _buttons.push(this.constructor.PAGE_TEXTS['first']);
         _locals.hasFirst = true;
       } else {
         _locals.hasFirst = false;
       }
       if (!curPage.isFirst) {
-        _buttons.push('prev');
+        _buttons.push(this.constructor.PAGE_TEXTS['prev']);
         _locals.hasPrev = true;
       } else {
         _locals.hasPrev = false;
@@ -191,7 +210,7 @@
         page = pages[_i];
         if (page.isLeftOuter || page.isRightOuter || page.isInsideWindow) {
           if (page.isCurrent) {
-            _buttons.push('current');
+            _buttons.push(this.constructor.PAGE_TEXTS['current']);
             _locals.pages.push({
               number: page.number,
               current: true
@@ -204,7 +223,7 @@
             });
           }
         } else if (!page.isWasTruncated) {
-          _buttons.push('gap');
+          _buttons.push(this.constructor.PAGE_TEXTS['gap']);
           _locals.pages.push({
             number: page.number,
             gap: true
@@ -212,13 +231,13 @@
         }
       }
       if (!curPage.isLast) {
-        _buttons.push('next');
+        _buttons.push(this.constructor.PAGE_TEXTS['next']);
         _locals.hasNext = true;
       } else {
         _locals.hasNext = false;
       }
       if (!curPage.isLast) {
-        _buttons.push('last');
+        _buttons.push(this.constructor.PAGE_TEXTS['last']);
         _locals.hasLast = true;
       } else {
         _locals.hasLast = false;
@@ -233,39 +252,58 @@
       return this.locals = _locals;
     };
 
-    Paginator.prototype.cloneArray = function(array) {
-      var value, _i, _len, _results;
-
-      _results = [];
-      for (_i = 0, _len = array.length; _i < _len; _i++) {
-        value = array[_i];
-        _results.push(value.clone());
-      }
-      return _results;
-    };
-
     return Paginator;
 
   })();
 
-  Extend = {
-    _perPaginateRecords: function() {
-      return this.records;
-    },
-    page: function(n, options) {
-      if (options == null) {
-        options = {};
+  isArray = function(value) {
+    return Object.prototype.toString.call(value) === '[object Array]';
+  };
+
+  Paginator.isArray = isArray;
+
+  if (this.MyPaginatorName != null) {
+    this[this.MyPaginatorName] = Paginator;
+  }
+
+  if (this.Spine != null) {
+    /*
+    # Spine Usage
+    
+    App = {}
+    
+    class App.User extends Spine.Model
+      @configure 'User', 'name' 
+      @extend Spine.Model.Paginator
+    
+    data = ({name: String.fromCharCode(num)} for num in ['a'.charCodeAt(0)..'z'.charCodeAt(0)])
+    
+    App.User.refresh(data)
+    pagination = App.User.page(2).per(5) #or App.User.page(2, {perPage: 5})
+    pagination.records
+    pagination.locals
+    pagination.buttons
+    App.User.PAGINATION = pagination
+    */
+
+    Paginator.SpineModelExtend = {
+      page: function(n, options) {
+        if (options == null) {
+          options = {};
+        }
+        return new Paginator(this._perPaginateRecords(), n, options);
+      },
+      _perPaginateRecords: function() {
+        return this.all();
       }
-      return new Paginator(this._perPaginateRecords(), n, options);
-    }
-  };
-
-  Model.Paginator = {
-    extended: function() {
-      return this.extend(Extend);
-    }
-  };
-
-  Spine.Paginator = Paginator;
+    };
+    Spine = this.Spine;
+    Spine.Paginator = Paginator;
+    Spine.Model.Paginator = {
+      extended: function() {
+        return this.extend(Paginator.SpineModelExtend);
+      }
+    };
+  }
 
 }).call(this);

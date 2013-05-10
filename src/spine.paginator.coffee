@@ -1,5 +1,13 @@
-Spine  = @Spine or require('spine')
-Model  = Spine.Model
+
+###
+  Usage
+
+  data = ({name: String.fromCharCode(num)} for num in ['a'.charCodeAt(0)..'z'.charCodeAt(0)])
+  pagination = new Paginator(data, 2, {perPage: 3})
+  pagination.records
+  pagination.locals
+  pagination.buttons
+###
 
 class Paginator
   @DEFAULT_PER_PAGE = 25
@@ -8,11 +16,22 @@ class Paginator
   @OUTER_WINDOW = 0
   @LEFT = 0
   @RIGHT = 0
+
+  @PAGE_TEXTS =
+    first: 'first'
+    prev: 'prev'
+    current: 'current'
+    next: 'next'
+    last: 'last'
+    gap: 'gap'
   
   constructor: (records, @_page, options={}) ->
+    records = [records] unless isArray(records)
+    @originalRecords = records
+    @totalCount = @originalRecords.length
+
     @_page = parseInt(@_page)
     @_page = 1 if isNaN(@_page) or @_page <= 0
-
     @_originalPage = @_page
 
     @perPage = options.perPage || @constructor.DEFAULT_PER_PAGE
@@ -27,9 +46,6 @@ class Paginator
     @left = outer_window if @left == 0  
     @right = options.right || @constructor.RIGHT
     @right = outer_window if @right == 0
-
-    @originalRecords = @cloneArray(records)
-    @totalCount = @originalRecords.length
 
     @skipbuildButtonsAndLocals = options.skipbuildButtonsAndLocals
 
@@ -70,29 +86,6 @@ class Paginator
 
   isLastPage: -> @currentPage() >= @lastPage()
 
-
-  pages: ->
-    currentPage = @currentPage()
-    firstPage = @firstPage()
-    lastPage = @lastPage()
-
-    _pages = []
-    last = null
-    for page in [firstPage..lastPage]
-      result = @buildPage(page, last, currentPage, firstPage, lastPage)
-      if result.isLeftOuter or result.isRightOuter or result.isInsideWindow
-        last = null
-      else
-        last = 'gap'
-      _pages.push result
-    _pages
-
-  curPage: ->
-    currentPage = @currentPage()
-    firstPage = @firstPage()
-    lastPage = @lastPage()
-    @buildPage(currentPage, null, currentPage, firstPage, lastPage)
-
   
   # private
 
@@ -116,7 +109,29 @@ class Paginator
     isLeftOuter: page <= @left
     isRightOuter: (lastPage - page) < @right
     isInsideWindow: Math.abs(currentPage - page) <= @window
-    isWasTruncated: last == 'gap'
+    isWasTruncated: last == @constructor.PAGE_TEXTS['gap']
+  
+  curPage: ->
+    currentPage = @currentPage()
+    firstPage = @firstPage()
+    lastPage = @lastPage()
+    @buildPage(currentPage, null, currentPage, firstPage, lastPage)
+
+  pages: ->
+    currentPage = @currentPage()
+    firstPage = @firstPage()
+    lastPage = @lastPage()
+
+    _pages = []
+    last = null
+    for page in [firstPage..lastPage]
+      result = @buildPage(page, last, currentPage, firstPage, lastPage)
+      if result.isLeftOuter or result.isRightOuter or result.isInsideWindow
+        last = null
+      else
+        last = @constructor.PAGE_TEXTS['gap']
+      _pages.push result
+    _pages
 
   buildButtonsAndLocals: ->
     _buttons = []
@@ -126,13 +141,13 @@ class Paginator
     pages = @pages()
 
     unless curPage.isFirst
-      _buttons.push('first')
+      _buttons.push(@constructor.PAGE_TEXTS['first'])
       _locals.hasFirst = true
     else
       _locals.hasFirst = false
 
     unless curPage.isFirst
-      _buttons.push('prev')
+      _buttons.push(@constructor.PAGE_TEXTS['prev'])
       _locals.hasPrev = true
     else
       _locals.hasPrev = false
@@ -141,24 +156,24 @@ class Paginator
     for page in pages
       if page.isLeftOuter or page.isRightOuter or page.isInsideWindow
         if page.isCurrent
-          _buttons.push('current')
+          _buttons.push(@constructor.PAGE_TEXTS['current'])
           _locals.pages.push({number: page.number, current: true})
         else
           _buttons.push(page.number)
           _locals.pages.push({number: page.number, current: false})
         
       else if !page.isWasTruncated
-        _buttons.push('gap')
+        _buttons.push(@constructor.PAGE_TEXTS['gap'])
         _locals.pages.push({number: page.number, gap: true})
 
     unless curPage.isLast
-      _buttons.push('next')
+      _buttons.push(@constructor.PAGE_TEXTS['next'])
       _locals.hasNext = true
     else
       _locals.hasNext = false
 
     unless curPage.isLast
-      _buttons.push('last')
+      _buttons.push(@constructor.PAGE_TEXTS['last'])
       _locals.hasLast = true
     else
       _locals.hasLast = false
@@ -174,26 +189,54 @@ class Paginator
     @buttons = _buttons
     @locals = _locals
 
-  cloneArray: (array) ->
-    (value.clone() for value in array)
+isArray = (value) ->
+  Object::toString.call(value) is '[object Array]'
 
-Extend =
-  _perPaginateRecords: -> @records
-  page: (n, options={})-> new Paginator(@_perPaginateRecords(), n, options)
+Paginator.isArray = isArray
+
+# 
+# if your want use window.Paginator, please set `window.MyPaginatorName = 'Paginator' ` before require this.
+# 
+if @MyPaginatorName?
+  @[@MyPaginatorName] = Paginator
+
+
+
+if @Spine?
+  ###
+  # Spine Usage
+
+  App = {}
+
+  class App.User extends Spine.Model
+    @configure 'User', 'name' 
+    @extend Spine.Model.Paginator
+
+  data = ({name: String.fromCharCode(num)} for num in ['a'.charCodeAt(0)..'z'.charCodeAt(0)])
+
+  App.User.refresh(data)
+  pagination = App.User.page(2).per(5) #or App.User.page(2, {perPage: 5})
+  pagination.records
+  pagination.locals
+  pagination.buttons
+  App.User.PAGINATION = pagination
+
+  ### 
+  Paginator.SpineModelExtend =
+    page: (n, options={})-> new Paginator(@_perPaginateRecords(), n, options)
+
+    # private
+    _perPaginateRecords: -> @all()
+
+  Spine  = @Spine
+  Spine.Paginator = Paginator
+
+  Spine.Model.Paginator =
+    extended: ->
+      @extend Paginator.SpineModelExtend
   
-Model.Paginator =
-  extended: ->
-    @extend Extend
 
-Spine.Paginator = Paginator
 
-# Usage
-# 
-# class App.MyModel extends Spine.Model
-#   @extend Spine.Model.Paginator
-# 
-# App.MyModel.fetch()
-# pagination = App.MyModel.page(6).per(10)
-# pagination.locals
-# 
+
+
 
