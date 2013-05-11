@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    title Spine Pagination Demo
+    link href="http://twitter.github.io/bootstrap/assets/css/bootstrap.css" rel="stylesheet"
+    link href="./spine_pagination.css" rel="stylesheet"
+    javascript:
+      window.MyPaginationName = "Paginator"
+    script src="http://code.jquery.com/jquery-1.9.1.min.js"
+    script src="../spec/lib/spine.js"
+    script src="../spec/lib/handlebars.js"
+    script src="../dist/spine.paginator.js"
+    script src="../dist/spine.pagination_controller.js"
+    script src="./spine_pagination.js"
+
+  body
+    h1 Spine Pagination Demo
+    #users
+      table.table.table-hover
+        thead
+          tr
+            td ID
+            td Name
+        tbody
+      #pagination

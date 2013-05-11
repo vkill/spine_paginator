@@ -1,46 +1,10 @@
 Spine  = @Spine or require('spine')
 
 ###
-App = {}
 
-class App.User extends Spine.Model
-  @configure 'User', 'name' 
-  @extend Spine.Model.Paginator
+Usage
 
-
-User = App.User
-App.UsersCtrl ||= {}
-Ctrl = App.UsersCtrl
-
-Ctrl.IndexPagination extends Spine.PaginationController
-  @MODEL = User
-  @PER_PAGES = [10, 20, 30, 40]
-  @PAGINATE_EVENT = "paginate"
-
-Ctrl.IndexTbody extends Spine.Controller
-  constructor: ->
-    super
-    User.bind Ctrl.IndexPagination.PAGINATE_EVENT, @render
-  
-  render: =>
-    collection = Ctrl.IndexPagination.PAGINATION.records
-    @html ""
-
-Ctrl.Index extends Spine.Controller
-  constructor: ->
-    super
-    @tbody = new Ctrl.IndexTbody
-      el: @$('tbody')
-    @pagination = new Ctrl.IndexPagination
-      el: @$('#pagination')
-    User.bind 'refresh', @refreshPagination
-    
-  @refreshPagination ->
-    Ctrl.IndexPagination.refresh()
-
-
-data = ({name: String.fromCharCode(num)} for num in ['a'.charCodeAt(0)..'z'.charCodeAt(0)])
-App.User.refresh(data)
+see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
 
 ###
 
@@ -79,7 +43,7 @@ class Spine.PaginationController extends Spine.Controller
   render: =>
     pagination = @constructor.PAGINATION
     if pagination.records.length > 0
-      @html @templateHtml()(pagination.locals)
+      @html @templateHtml()
     else
       @html @templateHtmlDataEmpty()
 
@@ -120,8 +84,9 @@ class Spine.PaginationController extends Spine.Controller
   
   templateHtmlDataEmpty: =>
     ""
-
+  
   templateHtml: ->
+    pagination = @constructor.PAGINATION
     source = """
       <div class="pagination pagination-small pull-right">
         <ul>
@@ -151,4 +116,4 @@ class Spine.PaginationController extends Spine.Controller
         </ul>
       </div>
     """
-    Handlebars.compile(source)
+    Handlebars.compile(source)(pagination.locals)

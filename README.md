@@ -1,8 +1,11 @@
 # SpinePaginator
 
-TODO: Write a gem description
+Paginator for Spine. [DEMO]()
+
 
 ## Installation
+
+### Rails
 
 Add this line to your application's Gemfile:
 
@@ -12,13 +15,11 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install spine_paginator
 
 ## Usage
 
-TODO: Write usage instructions here
+see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
+
 
 ## Contributing
 

@@ -11,46 +11,10 @@
   Spine = this.Spine || require('spine');
 
   /*
-  App = {}
   
-  class App.User extends Spine.Model
-    @configure 'User', 'name' 
-    @extend Spine.Model.Paginator
+  Usage
   
-  
-  User = App.User
-  App.UsersCtrl ||= {}
-  Ctrl = App.UsersCtrl
-  
-  Ctrl.IndexPagination extends Spine.PaginationController
-    @MODEL = User
-    @PER_PAGES = [10, 20, 30, 40]
-    @PAGINATE_EVENT = "paginate"
-  
-  Ctrl.IndexTbody extends Spine.Controller
-    constructor: ->
-      super
-      User.bind Ctrl.IndexPagination.PAGINATE_EVENT, @render
-    
-    render: =>
-      collection = Ctrl.IndexPagination.PAGINATION.records
-      @html ""
-  
-  Ctrl.Index extends Spine.Controller
-    constructor: ->
-      super
-      @tbody = new Ctrl.IndexTbody
-        el: @$('tbody')
-      @pagination = new Ctrl.IndexPagination
-        el: @$('#pagination')
-      User.bind 'refresh', @refreshPagination
-      
-    @refreshPagination ->
-      Ctrl.IndexPagination.refresh()
-  
-  
-  data = ({name: String.fromCharCode(num)} for num in ['a'.charCodeAt(0)..'z'.charCodeAt(0)])
-  App.User.refresh(data)
+  see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
   */
 
 
@@ -107,7 +71,7 @@
 
       pagination = this.constructor.PAGINATION;
       if (pagination.records.length > 0) {
-        return this.html(this.templateHtml()(pagination.locals));
+        return this.html(this.templateHtml());
       } else {
         return this.html(this.templateHtmlDataEmpty());
       }
@@ -164,10 +128,11 @@
     };
 
     PaginationController.prototype.templateHtml = function() {
-      var source;
+      var pagination, source;
 
+      pagination = this.constructor.PAGINATION;
       source = "<div class=\"pagination pagination-small pull-right\">\n  <ul>\n    <li {{#unless hasFirst}}class=\"disabled\"{{/unless}}>\n      <a href=\"javascript:void(0);\" data-page=\"first\">first</a>\n    </li>\n    <li {{#unless hasPrev}}class=\"disabled\"{{/unless}}>\n      <a href=\"javascript:void(0);\" data-page=\"prev\">prev</a>\n    </li>\n    {{#each pages}}\n      {{#if this.gap}}\n        <li class=\"disabled\">\n          <a href=\"javascript:void(0);\" data-page='gap'>...</a>\n        </li>\n      {{else}}\n        <li {{#if this.current}}class=\"active\"{{/if}}>\n          <a href=\"javascript:void(0);\" data-page={{this.number}}>{{this.number}}</a>\n        </li>\n      {{/if}}\n    {{/each}}\n    <li {{#unless hasNext}}class=\"disabled\"{{/unless}}>\n      <a href='javascript:void(0);' data-page=\"next\">next</a>\n    </li>\n    <li {{#unless hasLast}}class=\"disabled\"{{/unless}}>\n      <a href='javascript:void(0);' data-page=\"last\">last</a>\n    </li>\n  </ul>\n</div>";
-      return Handlebars.compile(source);
+      return Handlebars.compile(source)(pagination.locals);
     };
 
     return PaginationController;

@@ -14,6 +14,7 @@ module.exports = (grunt) ->
         files:
           'dist/spine.paginator.js': 'src/spine.paginator.coffee'
           'dist/spine.pagination_controller.js': 'src/spine.pagination_controller.coffee'
+          'examples/spine_pagination.js': 'examples/spine_pagination.coffee'
 
     concat:
       all:
@@ -22,7 +23,7 @@ module.exports = (grunt) ->
         files:
           'dist/spine.paginator.js': 'dist/spine.paginator.js'
           'dist/spine.pagination_controller.js': 'dist/spine.pagination_controller.js'
-
+          
     uglify:
       all:
         options:
@@ -38,10 +39,19 @@ module.exports = (grunt) ->
         options:
           specs: 'spec/spine.paginator/**/*.js'
           helpers: 'spec/lib/**/*.js'
+    
+    slim:
+      all:
+        files:
+          'examples/spine_pagination.html': 'examples/spine_pagination.slim'
+    sass:
+      all:
+        files:
+          'examples/spine_pagination.css': 'examples/spine_pagination.scss'
 
     watch:
       all:
-        files: 'src/*.coffee'
+        files: ['src/*.coffee', 'examples/*.coffee', 'examples/*.slim', 'examples/*.scss']
         tasks: ['build', 'spec']
 
   grunt.loadNpmTasks 'grunt-contrib-coffee'
@@ -49,7 +59,9 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-watch'
+  grunt.loadNpmTasks 'grunt-slim'
+  grunt.loadNpmTasks 'grunt-contrib-sass'
 
   grunt.registerTask 'default', ['watch']
   grunt.registerTask 'spec',    ['jasmine']
-  grunt.registerTask 'build',   ['coffee', 'concat', 'uglify']
+  grunt.registerTask 'build',   ['coffee', 'concat', 'uglify', 'slim', 'sass']

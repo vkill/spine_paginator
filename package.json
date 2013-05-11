@@ -8,7 +8,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/vkill/spina_paginator/blob/master/LICENSE-MIT"
+      "url": "https://github.com/vkill/spina_paginator/blob/master/LICENSE.txt"
     }
   ],
   "repository": {
@@ -24,7 +24,9 @@
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-uglify": "~0.2.0",
     "grunt-contrib-jasmine": "~0.4.2",
-    "grunt-contrib-watch": "~0.3.1"
+    "grunt-contrib-watch": "~0.3.1",
+    "grunt-slim": "~0.1.0",
+    "grunt-contrib-sass": "~0.3.0"
   },
   "engines": {
     "node": ">= 0.8.0"
