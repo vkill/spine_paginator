@@ -23,5 +23,5 @@ Add the following to your `app/assets/javascripts/application.js` file.
     //= require spine.paginator
     //= require spine.pagination_controller
 
-Then, see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
+Then, see https://github.com/vkill/spine_paginator/blob/master/examples/spine_pagination.coffee
 
