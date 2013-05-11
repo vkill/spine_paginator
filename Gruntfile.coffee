@@ -13,6 +13,7 @@ module.exports = (grunt) ->
       all:
         files:
           'dist/spine.paginator.js': 'src/spine.paginator.coffee'
+          'dist/spine.pagination_controller.js': 'src/spine.pagination_controller.coffee'
 
     concat:
       all:
@@ -20,6 +21,7 @@ module.exports = (grunt) ->
           banner: '<%= meta.banner %>'
         files:
           'dist/spine.paginator.js': 'dist/spine.paginator.js'
+          'dist/spine.pagination_controller.js': 'dist/spine.pagination_controller.js'
 
     uglify:
       all:
@@ -28,17 +30,18 @@ module.exports = (grunt) ->
           report: 'gzip'
         files:
           'dist/spine.paginator.min.js': 'dist/spine.paginator.js'
+          'dist/spine.pagination_controller.min.js': 'dist/spine.pagination_controller.js'
 
     jasmine:
       all:
-        src: 'dist/spine.paginator.js'
+        src: 'dist/*.js'
         options:
           specs: 'spec/spine.paginator/**/*.js'
           helpers: 'spec/lib/**/*.js'
 
     watch:
       all:
-        files: 'src/spine.paginator.coffee'
+        files: 'src/*.coffee'
         tasks: ['build', 'spec']
 
   grunt.loadNpmTasks 'grunt-contrib-coffee'
