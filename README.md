@@ -1,6 +1,6 @@
 # SpinePaginator
 
-Paginator for Spine. [DEMO]()
+Paginator for [Spine](https://github.com/spine/spine).
 
 
 ## Installation
@@ -11,20 +11,17 @@ Add this line to your application's Gemfile:
 
     gem 'spine_paginator'
 
-And then execute:
-
-    $ bundle
-
 
 ## Usage
 
-see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
+### Rails
 
+Add the following to your `app/assets/javascripts/application.js` file.
 
-## Contributing
+    //= require spine
+    //= require handlebars
+    //= spine.paginator
+    //= spine.pagination_controller
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+Then, see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
+
