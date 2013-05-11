@@ -1,6 +1,11 @@
 {
   "name": "spine.paginator",
-  "description": "Paginator for Spine.",
+  "description": "Paginator / Pagination for Spine.",
+  "keywords": [
+    "paginator",
+    "spine",
+    "pagination"
+  ],
   "version": "0.1.1",
   "author": "vkill",
   "url": "https://github.com/vkill/spine_paginator",

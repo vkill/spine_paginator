@@ -1,6 +1,6 @@
 # SpinePaginator
 
-Paginator for [Spine](https://github.com/spine/spine).
+Paginator/Pagination for [Spine](https://github.com/spine/spine).
 
 
 ## Installation

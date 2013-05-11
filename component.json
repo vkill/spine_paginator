@@ -1,8 +1,8 @@
 {
   "name": "spine.paginator",
   "repo": "vkill/spine_paginator",
-  "description": "Paginator for Spine.",
-  "version": "0.1.0",
+  "description": "Paginator/Pagination for Spine.",
+  "version": "0.1.1",
   "keywords": [
     "paginator",
     "spine",
