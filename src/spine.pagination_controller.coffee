@@ -4,7 +4,7 @@ Spine  = @Spine or require('spine')
 
 Usage
 
-see https://github.com/vkill/spine_paginator/examples/spine_pagination.coffee
+see https://github.com/vkill/spine_paginator/blob/master/examples/spine_pagination.coffee
 
 ###
 
