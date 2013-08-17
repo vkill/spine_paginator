@@ -21,56 +21,39 @@
   Spine.PaginationController = (function(_super) {
     __extends(PaginationController, _super);
 
-    PaginationController.MODEL = null;
-
-    PaginationController.PER_PAGES = [10, 20, 30, 40];
-
-    PaginationController.PAGINATE_EVENT = "paginate";
-
-    PaginationController.PAGE = 1;
-
-    PaginationController.PER_PAGE = null;
-
-    PaginationController.PAGINATION = null;
-
     function PaginationController() {
       this.templateHtmlDataEmpty = __bind(this.templateHtmlDataEmpty, this);
-      this.render = __bind(this.render, this);      PaginationController.__super__.constructor.apply(this, arguments);
-      if (this.constructor.MODEL == null) {
-        throw new Error("please defined class variable MODEL");
+      this.render = __bind(this.render, this);      this.page || (this.page = 1);
+      this.pagination || (this.pagination = null);
+      this.model || (this.model = null);
+      this.perPage || (this.perPage = 10);
+      this.paginateEvent || (this.paginateEvent = "paginate");
+      PaginationController.__super__.constructor.apply(this, arguments);
+      if (typeof this.model.page !== 'function') {
+        throw new Error("not found page function for model");
       }
-      this.constructor.PER_PAGE = this.constructor.PER_PAGES[0];
-      if (this.constructor.PER_PAGE == null) {
-        throw new Error("please defined class variable PER_PAGES");
-      }
-      this.constructor.MODEL.bind(this.constructor.PAGINATE_EVENT, this.render);
+      this.model.bind(this.paginateEvent, this.render);
     }
 
-    PaginationController.refresh = function() {
-      this.PAGE = 1;
+    PaginationController.prototype.refresh = function() {
+      this.page = 1;
       return this.load();
     };
 
-    PaginationController.toPage = function(page) {
-      this.PAGE = page;
+    PaginationController.prototype.toPage = function(page) {
+      this.page = page;
       return this.load();
     };
 
-    PaginationController.load = function() {
-      var pagination;
-
-      pagination = this.MODEL.page(this.PAGE, {
-        perPage: this.PER_PAGE
+    PaginationController.prototype.load = function() {
+      this.pagination = this.model.page(this.page, {
+        perPage: this.perPage
       });
-      this.PAGINATION = pagination;
-      return this.MODEL.trigger(this.PAGINATE_EVENT);
+      return this.model.trigger(this.paginateEvent);
     };
 
     PaginationController.prototype.render = function() {
-      var pagination;
-
-      pagination = this.constructor.PAGINATION;
-      if (pagination.records.length > 0) {
+      if (this.pagination.records.length > 0) {
         return this.html(this.templateHtml());
       } else {
         return this.html(this.templateHtmlDataEmpty());
@@ -89,7 +72,7 @@
       if (page == null) {
         return;
       }
-      return this.constructor.toPage(page);
+      return this.toPage(page);
     };
 
     PaginationController.prototype.getPageFromE = function(e) {
@@ -103,16 +86,16 @@
       page = null;
       switch (_page) {
         case 'first':
-          page = this.constructor.PAGINATION.firstPage();
+          page = this.pagination.firstPage();
           break;
         case 'prev':
-          page = this.constructor.PAGINATION.currentPage() - 1;
+          page = this.pagination.currentPage() - 1;
           break;
         case 'next':
-          page = this.constructor.PAGINATION.currentPage() + 1;
+          page = this.pagination.currentPage() + 1;
           break;
         case 'last':
-          page = this.constructor.PAGINATION.lastPage();
+          page = this.pagination.lastPage();
           break;
         case 'gap':
           page = null;
@@ -128,11 +111,28 @@
     };
 
     PaginationController.prototype.templateHtml = function() {
-      var pagination, source;
+      var div, firstLi, lastLi, locals, nextLi, page, pageLi, prevLi, ul, _i, _len, _ref;
 
-      pagination = this.constructor.PAGINATION;
-      source = "<div class=\"pagination pagination-small pull-right\">\n  <ul>\n    <li {{#unless hasFirst}}class=\"disabled\"{{/unless}}>\n      <a href=\"javascript:void(0);\" data-page=\"first\">first</a>\n    </li>\n    <li {{#unless hasPrev}}class=\"disabled\"{{/unless}}>\n      <a href=\"javascript:void(0);\" data-page=\"prev\">prev</a>\n    </li>\n    {{#each pages}}\n      {{#if this.gap}}\n        <li class=\"disabled\">\n          <a href=\"javascript:void(0);\" data-page='gap'>...</a>\n        </li>\n      {{else}}\n        <li {{#if this.current}}class=\"active\"{{/if}}>\n          <a href=\"javascript:void(0);\" data-page={{this.number}}>{{this.number}}</a>\n        </li>\n      {{/if}}\n    {{/each}}\n    <li {{#unless hasNext}}class=\"disabled\"{{/unless}}>\n      <a href='javascript:void(0);' data-page=\"next\">next</a>\n    </li>\n    <li {{#unless hasLast}}class=\"disabled\"{{/unless}}>\n      <a href='javascript:void(0);' data-page=\"last\">last</a>\n    </li>\n  </ul>\n</div>";
-      return Handlebars.compile(source)(pagination.locals);
+      locals = this.pagination.locals;
+      div = $("<div class='pagination pagination-small pull-right'></div>");
+      ul = $("<ul></ul>");
+      firstLi = $("<li><a href='javascript:void(0);' data-page='first'>first</a></li>").addClass(locals.hasFirst ? '' : 'disabled');
+      prevLi = $("<li><a href='javascript:void(0);' data-page='prev'>prev</a></li>").addClass(locals.hasPrev ? '' : 'disabled');
+      nextLi = $("<li><a href='javascript:void(0);' data-page='next'>next</a></li>").addClass(locals.hasNext ? '' : 'disabled');
+      lastLi = $("<li><a href='javascript:void(0);' data-page='last'>last</a></li>").addClass(locals.hasLast ? '' : 'disabled');
+      ul.append(firstLi).append(prevLi);
+      _ref = locals.pages;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        page = _ref[_i];
+        if (page.gap) {
+          pageLi = $("<li class='disabled'><a href='javascript:void(0);' data-page='gap'>...</a></li>");
+        } else {
+          pageLi = $("<li><a href='javascript:void(0);'' data-page='" + page.number + "'>" + page.number + "</a></li>").addClass(page.current ? 'active' : '');
+        }
+        ul.append(pageLi);
+      }
+      ul.append(nextLi).append(lastLi);
+      return div.append(ul);
     };
 
     return PaginationController;

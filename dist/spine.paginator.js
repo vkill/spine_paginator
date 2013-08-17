@@ -264,6 +264,8 @@
 
   if (this.MyPaginatorName != null) {
     this[this.MyPaginatorName] = Paginator;
+  } else {
+    this['Paginator'] = Paginator;
   }
 
   if (this.Spine != null) {

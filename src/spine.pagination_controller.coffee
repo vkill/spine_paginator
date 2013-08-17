@@ -11,38 +11,35 @@ see https://github.com/vkill/spine_paginator/blob/master/examples/spine_paginati
 
 class Spine.PaginationController extends Spine.Controller
 
-  @MODEL = null
-  @PER_PAGES = [10, 20, 30, 40]
-  @PAGINATE_EVENT = "paginate"
-  
-  @PAGE = 1
-  @PER_PAGE = null
-  @PAGINATION = null
-
   constructor: ->
+    @page ||= 1
+    @pagination ||= null
+
+    @model ||= null
+    @perPage ||= 10
+    @paginateEvent ||= "paginate"
+
     super
-    throw new Error("please defined class variable MODEL") unless @constructor.MODEL?
-    @constructor.PER_PAGE = @constructor.PER_PAGES[0]
-    throw new Error("please defined class variable PER_PAGES") unless @constructor.PER_PAGE?
-    @constructor.MODEL.bind @constructor.PAGINATE_EVENT, @render
+
+    if typeof(@model.page) isnt 'function'
+      throw new Error("not found page function for model")
+
+    @model.bind @paginateEvent, @render
   
-  @refresh: ->
-    @PAGE = 1
+  refresh: ->
+    @page = 1
     @load()
 
-  @toPage: (page)->
-    @PAGE = page
+  toPage: (page)->
+    @page = page
     @load()
 
-  @load: ->
-    pagination = @MODEL.page(@PAGE, {perPage: @PER_PAGE})
-    @PAGINATION = pagination
-    @MODEL.trigger(@PAGINATE_EVENT)
-
+  load: ->
+    @pagination = @model.page(@page, {perPage: @perPage})
+    @model.trigger(@paginateEvent)
 
   render: =>
-    pagination = @constructor.PAGINATION
-    if pagination.records.length > 0
+    if @pagination.records.length > 0
       @html @templateHtml()
     else
       @html @templateHtmlDataEmpty()
@@ -59,7 +56,7 @@ class Spine.PaginationController extends Spine.Controller
 
     page = @getPageFromE(e)
     return unless page?
-    @constructor.toPage(page)
+    @toPage(page)
   
   getPageFromE: (e) ->
     $node = $(e.target)
@@ -69,13 +66,13 @@ class Spine.PaginationController extends Spine.Controller
     page = null
     switch _page
       when 'first'
-        page = @constructor.PAGINATION.firstPage()
+        page = @pagination.firstPage()
       when 'prev'
-        page = @constructor.PAGINATION.currentPage() - 1
+        page = @pagination.currentPage() - 1
       when 'next'
-        page = @constructor.PAGINATION.currentPage() + 1
+        page = @pagination.currentPage() + 1
       when 'last'
-        page = @constructor.PAGINATION.lastPage()
+        page = @pagination.lastPage()
       when 'gap'
         page = null
       else
@@ -86,34 +83,24 @@ class Spine.PaginationController extends Spine.Controller
     ""
   
   templateHtml: ->
-    pagination = @constructor.PAGINATION
-    source = """
-      <div class="pagination pagination-small pull-right">
-        <ul>
-          <li {{#unless hasFirst}}class="disabled"{{/unless}}>
-            <a href="javascript:void(0);" data-page="first">first</a>
-          </li>
-          <li {{#unless hasPrev}}class="disabled"{{/unless}}>
-            <a href="javascript:void(0);" data-page="prev">prev</a>
-          </li>
-          {{#each pages}}
-            {{#if this.gap}}
-              <li class="disabled">
-                <a href="javascript:void(0);" data-page='gap'>...</a>
-              </li>
-            {{else}}
-              <li {{#if this.current}}class="active"{{/if}}>
-                <a href="javascript:void(0);" data-page={{this.number}}>{{this.number}}</a>
-              </li>
-            {{/if}}
-          {{/each}}
-          <li {{#unless hasNext}}class="disabled"{{/unless}}>
-            <a href='javascript:void(0);' data-page="next">next</a>
-          </li>
-          <li {{#unless hasLast}}class="disabled"{{/unless}}>
-            <a href='javascript:void(0);' data-page="last">last</a>
-          </li>
-        </ul>
-      </div>
-    """
-    Handlebars.compile(source)(pagination.locals)
+    locals = @pagination.locals
+
+    div = $("<div class='pagination pagination-small pull-right'></div>")
+    ul = $("<ul></ul>")
+
+    firstLi = $("<li><a href='javascript:void(0);' data-page='first'>first</a></li>").addClass(if locals.hasFirst then '' else 'disabled')
+    prevLi = $("<li><a href='javascript:void(0);' data-page='prev'>prev</a></li>").addClass(if locals.hasPrev then '' else 'disabled')
+    nextLi = $("<li><a href='javascript:void(0);' data-page='next'>next</a></li>").addClass(if locals.hasNext then '' else 'disabled')
+    lastLi = $("<li><a href='javascript:void(0);' data-page='last'>last</a></li>").addClass(if locals.hasLast then '' else 'disabled')
+
+    ul.append(firstLi).append(prevLi)
+    for page in locals.pages
+      if page.gap
+        pageLi = $("<li class='disabled'><a href='javascript:void(0);' data-page='gap'>...</a></li>")
+      else
+        pageLi = $("<li><a href='javascript:void(0);'' data-page='#{page.number}'>#{page.number}</a></li>").addClass(if page.current then 'active' else '')
+      ul.append(pageLi)
+    ul.append(nextLi).append(lastLi)
+
+    div.append(ul)
+

@@ -194,12 +194,10 @@ isArray = (value) ->
 
 Paginator.isArray = isArray
 
-# 
-# if your want use window.Paginator, please set `window.MyPaginatorName = 'Paginator' ` before require this.
-# 
 if @MyPaginatorName?
   @[@MyPaginatorName] = Paginator
-
+else
+  @['Paginator'] = Paginator
 
 
 if @Spine?

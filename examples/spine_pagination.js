@@ -1,5 +1,5 @@
 (function() {
-  var App, Ctrl, Spine, User, _ref, _ref1,
+  var App, Ctrl, Spine, User, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -34,15 +34,11 @@
     __extends(IndexPagination, _super);
 
     function IndexPagination() {
-      _ref1 = IndexPagination.__super__.constructor.apply(this, arguments);
-      return _ref1;
+      this.model = User;
+      this.perPage = 5;
+      this.paginateEvent = "paginate";
+      IndexPagination.__super__.constructor.apply(this, arguments);
     }
-
-    IndexPagination.MODEL = User;
-
-    IndexPagination.PER_PAGES = [5, 10, 20, 30];
-
-    IndexPagination.PAGINATE_EVENT = "paginate";
 
     return IndexPagination;
 
@@ -54,7 +50,7 @@
     function IndexTbody() {
       this.templateHtml = __bind(this.templateHtml, this);
       this.render = __bind(this.render, this);      IndexTbody.__super__.constructor.apply(this, arguments);
-      User.bind(Ctrl.IndexPagination.PAGINATE_EVENT, this.render);
+      User.bind(this.owner.pagination.paginateEvent, this.render);
     }
 
     IndexTbody.prototype.render = function() {
@@ -64,7 +60,7 @@
     IndexTbody.prototype.templateHtml = function() {
       var collection, source;
 
-      collection = Ctrl.IndexPagination.PAGINATION.records;
+      collection = this.owner.pagination.pagination.records;
       source = "{{#each collection}}\n  <tr data-id={{this.id}}>\n    <td>{{this.id}}</td>\n    <td>{{this.name}}</td>\n  </tr>\n{{/each}}";
       return Handlebars.compile(source)({
         collection: collection
@@ -79,18 +75,20 @@
     __extends(Index, _super);
 
     function Index() {
-      Index.__super__.constructor.apply(this, arguments);
-      this.tbody = new Ctrl.IndexTbody({
-        el: this.$('tbody')
-      });
+      this.refreshPagination = __bind(this.refreshPagination, this);      Index.__super__.constructor.apply(this, arguments);
       this.pagination = new Ctrl.IndexPagination({
-        el: this.$('#pagination')
+        el: this.$('#pagination'),
+        owner: this
+      });
+      this.tbody = new Ctrl.IndexTbody({
+        el: this.$('tbody'),
+        owner: this
       });
       User.bind('refresh', this.refreshPagination);
     }
 
     Index.prototype.refreshPagination = function() {
-      return Ctrl.IndexPagination.refresh();
+      return this.pagination.refresh();
     };
 
     return Index;
@@ -104,10 +102,10 @@
       el: '#users'
     });
     data = (function() {
-      var _i, _ref2, _ref3, _results;
+      var _i, _ref1, _ref2, _results;
 
       _results = [];
-      for (num = _i = _ref2 = 'A'.charCodeAt(0), _ref3 = 'z'.charCodeAt(0); _ref2 <= _ref3 ? _i <= _ref3 : _i >= _ref3; num = _ref2 <= _ref3 ? ++_i : --_i) {
+      for (num = _i = _ref1 = 'A'.charCodeAt(0), _ref2 = 'z'.charCodeAt(0); _ref1 <= _ref2 ? _i <= _ref2 : _i >= _ref2; num = _ref1 <= _ref2 ? ++_i : --_i) {
         _results.push({
           name: String.fromCharCode(num)
         });
