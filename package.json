@@ -6,7 +6,7 @@
     "spine",
     "pagination"
   ],
-  "version": "0.1.1",
+  "version": "1.0.0",
   "author": "vkill",
   "url": "https://github.com/vkill/spine_paginator",
   "main": "./dist/spine.paginator.js",
