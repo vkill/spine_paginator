@@ -19,7 +19,6 @@ Add this line to your application's Gemfile:
 Add the following to your `app/assets/javascripts/application.js` file.
 
     //= require spine
-    //= require handlebars
     //= require spine.paginator
     //= require spine.pagination_controller
 
