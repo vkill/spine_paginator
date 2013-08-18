@@ -32,6 +32,12 @@ module.exports = (grunt) ->
         files:
           'dist/spine.paginator.min.js': 'dist/spine.paginator.js'
           'dist/spine.pagination_controller.min.js': 'dist/spine.pagination_controller.js'
+    
+    copy:
+      main:
+        files: [
+          {expand: true, flatten: true, src: ['dist/**'], dest: 'vendor/assets/javascripts/'}
+        ]
 
     jasmine:
       all:
@@ -59,9 +65,10 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-watch'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-slim'
   grunt.loadNpmTasks 'grunt-contrib-sass'
 
   grunt.registerTask 'default', ['watch']
   grunt.registerTask 'spec',    ['jasmine']
-  grunt.registerTask 'build',   ['coffee', 'concat', 'uglify', 'slim', 'sass']
+  grunt.registerTask 'build',   ['coffee', 'concat', 'uglify', 'copy', 'slim', 'sass']
