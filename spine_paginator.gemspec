@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Paginator for Spine}
   gem.summary       = %q{Paginator for Spine}
   gem.homepage      = "https://github.com/vkill/spine_paginator"
+  gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
